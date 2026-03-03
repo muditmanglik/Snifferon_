@@ -1,0 +1,291 @@
+# Instincts generated from https://github.com/meamritanshu/Snifferon
+# Generated: 2026-03-03T20:00:02.421Z
+# Version: 2.0
+
+---
+id: Snifferon-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/meamritanshu/Snifferon
+---
+
+# Snifferon Commit Length
+
+## Action
+
+Keep commit messages concise (under 50 characters)
+
+## Evidence
+
+- Average commit message length: 33 chars
+- Based on 8 commits
+
+---
+id: Snifferon-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/meamritanshu/Snifferon
+---
+
+# Snifferon Naming Files
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: camelCase
+
+---
+id: Snifferon-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/meamritanshu/Snifferon
+---
+
+# Snifferon Export Style
+
+## Action
+
+Prefer mixed exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: mixed
+
+---
+id: Snifferon-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/meamritanshu/Snifferon
+---
+
+# Snifferon Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: Snifferon-workflow-style-cleanup-workflow
+trigger: "when doing style cleanup workflow"
+confidence: 0.6
+domain: workflow
+source: repo-analysis
+source_repo: https://github.com/meamritanshu/Snifferon
+---
+
+# Snifferon Workflow Style Cleanup Workflow
+
+## Action
+
+Follow the style-cleanup-workflow workflow:
+1. Identify redundant stylesheet
+2. Remove duplicate file
+3. Create pull request for cleanup
+4. Merge cleanup changes
+
+## Evidence
+
+- Workflow detected from commit patterns
+- Frequency: ~2x per month
+- Files: style.css, static/style.css
+
+---
+id: snifferon-file-naming
+trigger: "When creating new files"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon File Naming
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Consistent camelCase pattern observed in existing files
+- Naming convention analysis shows camelCase preference
+
+---
+id: snifferon-function-naming
+trigger: "When defining functions"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Function Naming
+
+## Action
+
+Use camelCase naming convention
+
+## Evidence
+
+- Function naming analysis shows camelCase pattern
+- Python code follows camelCase for functions
+
+---
+id: snifferon-class-naming
+trigger: "When defining classes"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Class Naming
+
+## Action
+
+Use PascalCase naming convention
+
+## Evidence
+
+- Class naming analysis shows PascalCase pattern
+- Python code follows PascalCase for classes
+
+---
+id: snifferon-constants-naming
+trigger: "When defining constants"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Constants Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE naming convention
+
+## Evidence
+
+- Constants naming analysis shows SCREAMING_SNAKE_CASE pattern
+- Python constants follow uppercase snake case
+
+---
+id: snifferon-chore-commits
+trigger: "When making maintenance commits"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Chore Commits
+
+## Action
+
+Prefix commit with 'chore:'
+
+## Evidence
+
+- Commit 'chore: remove redundant style sheet'
+- Chore prefix detected in commit patterns
+
+---
+id: snifferon-commit-length
+trigger: "When writing commit messages"
+confidence: 0.5
+domain: git
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Commit Length
+
+## Action
+
+Keep commit message around 33 characters
+
+## Evidence
+
+- Average commit length observed at 33 characters
+- Examples show concise commit messages
+
+---
+id: snifferon-duplicate-css-detection
+trigger: "When duplicate CSS files are detected"
+confidence: 0.75
+domain: workflow
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Duplicate Css Detection
+
+## Action
+
+Remove redundant stylesheet and create cleanup PR
+
+## Evidence
+
+- Commit 'chore: remove redundant style sheet'
+- Merge PR #2 for removing duplicate CSS file
+- Pattern shows style.css and static/style.css conflicts
+
+---
+id: snifferon-static-folder-structure
+trigger: "When organizing web assets"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Static Folder Structure
+
+## Action
+
+Place static files in 'static' folder
+
+## Evidence
+
+- Common folder 'static' identified
+- Web application structure shows static assets organization
+
+---
+id: snifferon-templates-structure
+trigger: "When creating HTML templates"
+confidence: 0.8
+domain: architecture
+source: repo-analysis
+source_repo: meamritanshu/Snifferon
+---
+
+# Snifferon Templates Structure
+
+## Action
+
+Place templates in 'templates' folder
+
+## Evidence
+
+- Common folder 'templates' identified
+- Template organization pattern detected
+- Commit mentions 'main template for network visualization suite'
+
