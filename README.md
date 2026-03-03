@@ -1,4 +1,4 @@
-# Snifferon_ — Aura: Advanced Network Visualization Suite
+# Snifferon —  Advanced Network Visualization 
 
 A real-time network packet sniffer and visualization dashboard built with **Flask**, **SocketIO**, **Scapy**, and **D3.js**. Snifferon captures live network traffic on your machine, analyzes it with machine learning, and displays it as an interactive force-directed graph — letting you see exactly who your computer is talking to, and how.
 
