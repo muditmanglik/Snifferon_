@@ -146,11 +146,6 @@
     </footer>
 
     <script>
-        // --- Layout & Data State (restored) ---
-        const graphContainer = document.getElementById('network-graph-container') || { clientWidth: window.innerWidth, clientHeight: window.innerHeight };
-        const WIDTH = graphContainer.clientWidth || window.innerWidth;
-        const HEIGHT = graphContainer.clientHeight || window.innerHeight;
-
         // --- Data State ---
         let nodes = [];
         let links = [];
@@ -164,17 +159,7 @@
         const MAX_LOG_ENTRIES = 200;
         const MAX_ANOMALY_LOG_ENTRIES = 50;
 
-        // --- D3 Setup ---
-        const svg = d3.select("#network-graph").attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
-        const container = svg.append("g");
-        const tooltip = d3.select("#tooltip");
-
-        const simulation = d3.forceSimulation()
-            .force("link", d3.forceLink().id(d => d.id).distance(100))
-            .force("charge", d3.forceManyBody().strength(-80)) // reduced repulsion strength
-            .force("center", d3.forceCenter(WIDTH / 2, HEIGHT / 2))
-            .on("tick", ticked);
-
+        // --- Color Scales (defined early, used globally) ---
         const colorScale = d3.scaleOrdinal()
             .domain(["HTTPS", "HTTP", "DNS", "TCP", "UDP", "ICMP", "Unknown"])
             .range(["#22C55E", "#F59E0B", "#3B82F6", "#EF4444", "#8B5CF6", "#6B7280", "#9CA3AF"]);
@@ -182,15 +167,9 @@
         const classColorScale = d3.scaleOrdinal()
             .domain(["Normal", "Web Browsing", "Streaming", "DNS Query/Response", "Port Scan", "File Transfer", "Background Service", "Unknown"])
             .range(["#22C55E", "#3B82F6", "#F59E0B", "#8B5CF6", "#EF4444", "#6B7280", "#9CA3AF", "#4a4a4a"]);
-        
-        let linkGroup = container.append("g").attr("class", "links");
-        let nodeGroup = container.append("g").attr("class", "nodes");
 
-        // --- Zoom --- 
-        const zoom = d3.zoom().scaleExtent([0.1, 8]).on("zoom", (event) => {
-            container.attr("transform", event.transform);
-        });
-        svg.call(zoom);
+        // --- D3 variables (initialized in DOMContentLoaded after layout is known) ---
+        let svg, graphContainer, container, tooltip, simulation, zoom, linkGroup, nodeGroup;
 
         // --- Visualization Update Function ---
         function update() {
@@ -370,9 +349,45 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            // --- D3 Setup: must happen here, after DOM is laid out so dimensions are real ---
+            graphContainer = document.getElementById('network-graph-container');
+            const WIDTH = graphContainer.clientWidth || window.innerWidth;
+            const HEIGHT = graphContainer.clientHeight || Math.max(500, window.innerHeight * 0.55);
+
+            svg = d3.select("#network-graph")
+                .attr("width", WIDTH)
+                .attr("height", HEIGHT)
+                .attr("viewBox", `0 0 ${WIDTH} ${HEIGHT}`);
+            container = svg.append("g");
+            tooltip = d3.select("#tooltip");
+
+            linkGroup = container.append("g").attr("class", "links");
+            nodeGroup = container.append("g").attr("class", "nodes");
+
+            simulation = d3.forceSimulation()
+                .force("link", d3.forceLink().id(d => d.id).distance(120))
+                .force("charge", d3.forceManyBody().strength(-200))
+                .force("center", d3.forceCenter(WIDTH / 2, HEIGHT / 2))
+                .on("tick", ticked);
+
+            zoom = d3.zoom().scaleExtent([0.1, 8]).on("zoom", (event) => {
+                container.attr("transform", event.transform);
+            });
+            svg.call(zoom);
+
+            // Keep graph sized correctly if window resizes
+            new ResizeObserver(() => {
+                const W = graphContainer.clientWidth;
+                const H = graphContainer.clientHeight;
+                if (W > 0 && H > 0) {
+                    svg.attr("width", W).attr("height", H).attr("viewBox", `0 0 ${W} ${H}`);
+                    simulation.force("center", d3.forceCenter(W / 2, H / 2)).alpha(0.3).restart();
+                }
+            }).observe(graphContainer);
+
             setupFilters();
             setupUIControls();
-            setupInfoTooltips(); // Initialize the new tooltips
+            setupInfoTooltips();
             const socket = io();
 
             socket.on('connect', () => console.log("Socket.IO connected!"));

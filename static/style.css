@@ -443,14 +443,3 @@ body {
     100% { opacity: 1; }
 }
 
-.node .anomaly-flash {
-    stroke: var(--accent-red) !important;
-    stroke-width: 4px;
-    animation: flash 1s;
-}
-
-@keyframes flash {
-    0% { opacity: 1; }
-    50% { opacity: 0.2; }
-    100% { opacity: 1; }
-}

@@ -1,9 +1,5 @@
 # app.py
-
-import eventlet
-eventlet.monkey_patch()
-from eventlet import hubs
-hubs.use_hub("poll")
+import sys
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 from scapy.all import sniff, IP, TCP, UDP, ICMP, DNS, get_if_addr
@@ -11,7 +7,7 @@ import threading
 import datetime
 import time
 from collections import defaultdict, deque
-import random # For simulating confidence
+import random  # For simulating confidence
 
 # --- ML Imports ---
 import pandas as pd
@@ -25,10 +21,34 @@ app = Flask(__name__)
 # Disable caching for development
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-socketio = SocketIO(app, async_mode='eventlet', cors_allowed_origins="*")
+socketio = SocketIO(app, async_mode='threading', cors_allowed_origins="*")
 
 # --- Configuration ---
-INTERFACE = 'en0'
+def get_active_interface():
+    """Auto-detects the active network interface by matching the machine's outbound IP."""
+    import socket
+    from scapy.all import get_if_list, get_if_addr
+    try:
+        # Connect to external address to determine outbound IP (no data sent)
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        for iface in get_if_list():
+            try:
+                if get_if_addr(iface) == local_ip:
+                    print(f"[INFO] Auto-detected interface: {iface} (IP: {local_ip})")
+                    return iface
+            except Exception:
+                continue
+    except Exception as e:
+        print(f"[WARN] Could not auto-detect interface: {e}")
+    # Fallback
+    fallback = get_if_list()[0] if get_if_list() else 'en0'
+    print(f"[INFO] Falling back to interface: {fallback}")
+    return fallback
+
+INTERFACE = get_active_interface()
 
 # --- Anomaly Detection Model Setup ---
 ANOMALY_PACKET_BUFFER_SIZE = 1000 # Reduced from 5000 for faster model training
@@ -150,13 +170,13 @@ def train_clustering_model():
     print("[ML] Detected Patterns:", pattern_distribution)
     socketio.emit('clustering_update', pattern_distribution)
 
+
 def periodic_classification_updater():
     """
     Periodically calculates and emits the traffic classification distribution.
-    Emits both packet-count and byte-size percentages for each class.
     """
     while True:
-        socketio.sleep(10) # Update every 10 seconds
+        time.sleep(10)
         if not classification_counts:
             continue
 
@@ -180,12 +200,11 @@ def periodic_classification_updater():
 
 def periodic_clustering_trainer():
     """
-    Periodically retrains the clustering model every 30 seconds to find new patterns.
+    Periodically retrains the clustering model every 30 seconds.
     """
     while True:
-        socketio.sleep(30)
+        time.sleep(30)
         print("\n[ML] Triggering periodic clustering model update...")
-        # Run training in a separate background task so this loop doesn't block
         socketio.start_background_task(train_clustering_model)
 
 def classify_traffic(packet_features, src_ip, dst_ip, flow_key):
@@ -238,7 +257,7 @@ def update_temporal_insights():
         one_minute_ago = now - 60
         current_packets = [ts for ts in packet_timestamps if ts > one_minute_ago]
         current_rate = len(current_packets)
-        baseline_rate = len(packet_timestamps) / (TIME_WINDOW / 60) 
+        baseline_rate = len(packet_timestamps) / (TIME_WINDOW / 60)
 
         if current_rate > last_rate: trend = 'increasing'
         elif current_rate < last_rate: trend = 'decreasing'
@@ -250,7 +269,7 @@ def update_temporal_insights():
             'baseline_rate': round(baseline_rate, 2),
             'trend': trend
         })
-        socketio.sleep(5)
+        time.sleep(5)
 
 def packet_callback(packet):
     global anomaly_model, anomaly_packet_buffer, flow_data, clustering_model, packet_timestamps, packet_count_since_last_log
@@ -293,7 +312,6 @@ def packet_callback(packet):
             is_anomaly = True if prediction[0] == -1 else False
         elif len(anomaly_packet_buffer) < ANOMALY_PACKET_BUFFER_SIZE:
             anomaly_packet_buffer.append(packet_features)
-            # Emit buffer progress
             socketio.emit('buffer_update', {'count': len(anomaly_packet_buffer), 'total': ANOMALY_PACKET_BUFFER_SIZE})
             if len(anomaly_packet_buffer) == ANOMALY_PACKET_BUFFER_SIZE:
                 socketio.emit('status_update', {'message': 'Buffer full. Starting model training...'})
@@ -374,10 +392,10 @@ if __name__ == '__main__':
     sniffer_thread.daemon = True
     sniffer_thread.start()
     socketio.start_background_task(update_temporal_insights)
-    socketio.start_background_task(periodic_clustering_trainer) # Start the new periodic trainer
-    socketio.start_background_task(periodic_classification_updater) # Start the classification updater
-    print("Starting Flask-SocketIO server on http://0.0.0.0:5001")
-    socketio.run(app, host='0.0.0.0', port=5001)
+    socketio.start_background_task(periodic_clustering_trainer)
+    socketio.start_background_task(periodic_classification_updater)
+    print("Starting Flask-SocketIO server on http://127.0.0.1:5001")
+    socketio.run(app, host='127.0.0.1', port=5001, allow_unsafe_werkzeug=True)
     print("\nServer shutting down. Stopping sniffer...")
     stop_sniffing.set()
     sniffer_thread.join()
